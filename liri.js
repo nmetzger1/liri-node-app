@@ -1,3 +1,6 @@
+var keyfile = require("./keys.js");
+var Twitter = require("twitter");
+
 var chosenFunction = process.argv[2];
 
 switch (chosenFunction){
@@ -19,6 +22,30 @@ switch (chosenFunction){
 
 function displayTweets() {
     console.log("Tweet Tweet");
+
+    var keys = keyfile.twitterKeys;
+
+    var client = new Twitter({
+        consumer_key: keys.consumer_key,
+        consumer_secret: keys.consumer_secret,
+        access_token_key: keys.access_token_key,
+        access_token_secret: keys.access_token_secret
+    });
+
+    var parameters = {
+        screen_name: 'The_Factosaurus',
+        count: "20"
+    };
+
+    client.get('statuses/user_timeline', parameters, function (error, tweets) {
+        if(error){
+            throw error;
+        }
+
+        for(var i = 0; i < tweets.length; i++){
+            console.log(i+1 + ": " + tweets[i].text + " (" + tweets[i].created_at + ")");
+        }
+    })
 }
 
 function spotifyThis() {
