@@ -1,10 +1,22 @@
+//global variables
+var chosenFunction;
+var searchTerm = "";
+
+//require files
 var keyfile = require("./keys.js");
 var Twitter = require("twitter");
 var spotify = require("spotify");
+var request = require("request");
+var fs = require("fs");
 
-var chosenFunction = process.argv[2];
-var searchTerm = "";
+//get user inputs
+chosenFunction = process.argv[2];
 
+if(process.argv[3] != null){
+    searchTerm = process.argv[3];
+}
+
+//run function
 switch (chosenFunction){
     case "my-tweets":
         displayTweets();
@@ -21,21 +33,6 @@ switch (chosenFunction){
     default:
         console.log("Please choose one of the following options: 'my-tweets', 'spotify-this-song', 'movie-this', 'do-what-it-says")
 }
-
-function getSearchTerm() {
-    if(process.argv[3] != null){
-        searchTerm = process.argv[3];
-        return;
-    }
-
-    if(process.argv[2] === "spotify-this-song"){
-        searchTerm = "Ace of Base The Sign";
-    }
-    else {
-        searchTerm = "Mr. Nobody";
-    }
-}
-
 
 
 function displayTweets() {
@@ -68,11 +65,18 @@ function displayTweets() {
 
 function spotifyThis() {
 
-    getSearchTerm();
+    var song;
+
+    if(searchTerm === ""){
+        song = "Ace of Base I Saw the Sign"
+    }
+    else {
+        song = searchTerm;
+    }
 
     var options = {
         type: "track",
-        query: searchTerm
+        query: song
     };
 
     spotify.search(options, function (err, data) {
@@ -89,11 +93,51 @@ function spotifyThis() {
 }
 
 function movieThis() {
-    getSearchTerm();
-    console.log("movies")
+
+    var movie;
+
+    if(searchTerm === ""){
+        movie = "Mr. Nobody";
+    }
+    else {
+        movie = searchTerm;
+    }
+
+    url = 'http://www.omdbapi.com/?t=' + movie + '&tomatoes=true&plot=full';
+    request(url, function (err, response, body) {
+        if(err){
+            throw err;
+        }
+
+        var data = JSON.parse(body);
+
+        console.log("Title:", data.Title);
+        console.log("Released:", data.Year);
+        console.log("IMDB Rating:", data.imdbRating);
+        console.log("Countries:", data.Country.toString(", "));
+        console.log("Language:", data.Language);
+        console.log("Plot:", data.Plot);
+        console.log("Cast:", data.Actors.toString(", "));
+        if(data.Ratings[1] === undefined){
+            console.log("No Rotten Tomatoes Score");
+        }
+        else {
+            console.log("Tomator Rating:", data.Ratings[1].Value);
+        }
+        console.log("Rotten Tomatoes URL:", data.tomatoURL);
+    });
 }
 
 function doWhat() {
-    console.log("do what?!?");
-}
+    fs.readFile('random.txt', 'utf8', function (err, data) {
 
+        if(err){
+            throw err;
+        }
+
+        searchTerm = data;
+
+        spotifyThis();
+
+    })
+}
