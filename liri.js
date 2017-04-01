@@ -1,17 +1,22 @@
 var keyfile = require("./keys.js");
 var Twitter = require("twitter");
+var spotify = require("spotify");
 
 var chosenFunction = process.argv[2];
+
+if(process.argv[3] != null){
+    var searchTerm = process.argv[3];
+}
 
 switch (chosenFunction){
     case "my-tweets":
         displayTweets();
         break;
     case "spotify-this-song":
-        spotifyThis();
+        spotifyThis(searchTerm);
         break;
     case "movie-this":
-        movieThis();
+        movieThis(searchTerm);
         break;
     case "do-what-it-says":
         doWhat();
@@ -49,7 +54,27 @@ function displayTweets() {
 }
 
 function spotifyThis() {
-    console.log("la la la");
+
+    if(searchTerm == null){
+        var searchTerm = "The Sign Ace of Base";
+    }
+
+    var options = {
+        type: "track",
+        query: searchTerm
+    };
+
+    spotify.search(options, function (err, data) {
+        if(err){
+            throw err;
+        }
+        //console.log(data.tracks.items[0]);
+
+        console.log("Artist:", data.tracks.items[0].artists[0].name);
+        console.log("Song Name:", data.tracks.items[0].name);
+        console.log("Preview URL:", data.tracks.items[0].preview_url);
+        console.log("Album:", data.tracks.items[0].album.name);
+    })
 }
 
 function movieThis() {
