@@ -3,10 +3,7 @@ var Twitter = require("twitter");
 var spotify = require("spotify");
 
 var chosenFunction = process.argv[2];
-
-if(process.argv[3] != null){
-    var searchTerm = process.argv[3];
-}
+var searchTerm = "";
 
 switch (chosenFunction){
     case "my-tweets":
@@ -24,6 +21,22 @@ switch (chosenFunction){
     default:
         console.log("Please choose one of the following options: 'my-tweets', 'spotify-this-song', 'movie-this', 'do-what-it-says")
 }
+
+function getSearchTerm() {
+    if(process.argv[3] != null){
+        searchTerm = process.argv[3];
+        return;
+    }
+
+    if(process.argv[2] === "spotify-this-song"){
+        searchTerm = "Ace of Base The Sign";
+    }
+    else {
+        searchTerm = "Mr. Nobody";
+    }
+}
+
+
 
 function displayTweets() {
     console.log("Tweet Tweet");
@@ -55,9 +68,7 @@ function displayTweets() {
 
 function spotifyThis() {
 
-    if(searchTerm == null){
-        var searchTerm = "The Sign Ace of Base";
-    }
+    getSearchTerm();
 
     var options = {
         type: "track",
@@ -78,6 +89,7 @@ function spotifyThis() {
 }
 
 function movieThis() {
+    getSearchTerm();
     console.log("movies")
 }
 
