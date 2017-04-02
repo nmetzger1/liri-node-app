@@ -1,6 +1,7 @@
 //global variables
 var chosenFunction;
 var searchTerm = "";
+var dataArray = [];
 
 //require files
 var keyfile = require("./keys.js");
@@ -12,8 +13,9 @@ var fs = require("fs");
 //get user inputs
 chosenFunction = process.argv[2];
 
-if(process.argv[3] != null){
-    searchTerm = process.argv[3];
+//combine search arguments into single string
+for(var i = 3; i < process.argv.length; i++){
+    searchTerm = searchTerm + " " + process.argv[i];
 }
 
 //run function
@@ -33,7 +35,6 @@ switch (chosenFunction){
     default:
         console.log("Please choose one of the following options: 'my-tweets', 'spotify-this-song', 'movie-this', 'do-what-it-says")
 }
-
 
 function displayTweets() {
     console.log("Tweet Tweet");
@@ -57,21 +58,25 @@ function displayTweets() {
             throw error;
         }
 
+        dataArray.push("Last 20 tweets from: The_Factosaurus");
+
         for(var i = 0; i < tweets.length; i++){
-            console.log(i+1 + ": " + tweets[i].text + " (" + tweets[i].created_at + ")");
+            //console.log(i+1 + ": " + tweets[i].text + " (" + tweets[i].created_at + ")");
+            var newTweet = i+1 + ": " + tweets[i].text + " (" + tweets[i].created_at + ")";
+            dataArray.push(newTweet);
         }
+
+        addToLog(dataArray);
+
     })
 }
 
 function spotifyThis() {
 
-    var song;
+    var song = searchTerm;
 
     if(searchTerm === ""){
         song = "Ace of Base I Saw the Sign"
-    }
-    else {
-        song = searchTerm;
     }
 
     var options = {
@@ -83,24 +88,24 @@ function spotifyThis() {
         if(err){
             throw err;
         }
-        //console.log(data.tracks.items[0]);
 
-        console.log("Artist:", data.tracks.items[0].artists[0].name);
-        console.log("Song Name:", data.tracks.items[0].name);
-        console.log("Preview URL:", data.tracks.items[0].preview_url);
-        console.log("Album:", data.tracks.items[0].album.name);
+        //store data in array
+        dataArray.push("Artist: " + data.tracks.items[0].artists[0].name);
+        dataArray.push("Song Name: " + data.tracks.items[0].name);
+        dataArray.push("Preview URL: " + data.tracks.items[0].preview_url);
+        dataArray.push("Album: " + data.tracks.items[0].album.name);
+
+        //log data
+        addToLog(dataArray);
     })
 }
 
 function movieThis() {
 
-    var movie;
+    var movie = searchTerm;
 
     if(searchTerm === ""){
         movie = "Mr. Nobody";
-    }
-    else {
-        movie = searchTerm;
     }
 
     url = 'http://www.omdbapi.com/?t=' + movie + '&tomatoes=true&plot=full';
@@ -111,20 +116,22 @@ function movieThis() {
 
         var data = JSON.parse(body);
 
-        console.log("Title:", data.Title);
-        console.log("Released:", data.Year);
-        console.log("IMDB Rating:", data.imdbRating);
-        console.log("Countries:", data.Country.toString(", "));
-        console.log("Language:", data.Language);
-        console.log("Plot:", data.Plot);
-        console.log("Cast:", data.Actors.toString(", "));
+        dataArray.push("Title: " + data.Title);
+        dataArray.push("Released: " + data.Year);
+        dataArray.push("IMDB Rating: " + data.imdbRating);
+        dataArray.push("Countries: " + data.Country.toString(", "));
+        dataArray.push("Language: " + data.Language);
+        dataArray.push("Plot: " + data.Plot);
+        dataArray.push("Cast: " + data.Actors.toString(", "));
         if(data.Ratings[1] === undefined){
-            console.log("No Rotten Tomatoes Score");
+            dataArray.push("No Rotten Tomatoes Score");
         }
         else {
-            console.log("Tomator Rating:", data.Ratings[1].Value);
+            dataArray.push("Tomator Rating: " + data.Ratings[1].Value);
         }
-        console.log("Rotten Tomatoes URL:", data.tomatoURL);
+        dataArray.push("Rotten Tomatoes URL: " + data.tomatoURL);
+
+        addToLog(dataArray);
     });
 }
 
@@ -140,4 +147,14 @@ function doWhat() {
         spotifyThis();
 
     })
+}
+
+function addToLog(logData){
+
+    //display in console
+    console.log(logData.join('\r\n'));
+
+    //log to text file
+    fs.appendFileSync("log.txt", logData.join('\r\n'));
+    fs.appendFileSync("log.txt", '\r\n***************************************************\r\n');
 }
