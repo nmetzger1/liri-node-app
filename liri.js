@@ -9,6 +9,7 @@ var Twitter = require("twitter");
 var spotify = require("spotify");
 var request = require("request");
 var fs = require("fs");
+var colors = require("colors/safe");
 
 //get user inputs
 chosenFunction = process.argv[2];
@@ -61,12 +62,11 @@ function displayTweets() {
         dataArray.push("Last 20 tweets from: The_Factosaurus");
 
         for(var i = 0; i < tweets.length; i++){
-            //console.log(i+1 + ": " + tweets[i].text + " (" + tweets[i].created_at + ")");
             var newTweet = i+1 + ": " + tweets[i].text + " (" + tweets[i].created_at + ")";
             dataArray.push(newTweet);
         }
 
-        addToLog(dataArray);
+        addToLog(dataArray, "green");
 
     })
 }
@@ -96,7 +96,7 @@ function spotifyThis() {
         dataArray.push("Album: " + data.tracks.items[0].album.name);
 
         //log data
-        addToLog(dataArray);
+        addToLog(dataArray, "red");
     })
 }
 
@@ -111,10 +111,16 @@ function movieThis() {
     url = 'http://www.omdbapi.com/?t=' + movie + '&tomatoes=true&plot=full';
     request(url, function (err, response, body) {
         if(err){
-            throw err;
+            console.log("Movie not found");
         }
 
+
         var data = JSON.parse(body);
+
+        if(data.Response === "False"){
+            console.log("Your search for " + movie + " returned 0 results");
+            return;
+        }
 
         dataArray.push("Title: " + data.Title);
         dataArray.push("Released: " + data.Year);
@@ -131,7 +137,7 @@ function movieThis() {
         }
         dataArray.push("Rotten Tomatoes URL: " + data.tomatoURL);
 
-        addToLog(dataArray);
+        addToLog(dataArray, "blue");
     });
 }
 
@@ -149,10 +155,21 @@ function doWhat() {
     })
 }
 
-function addToLog(logData){
+function addToLog(logData, color){
 
     //display in console
-    console.log(logData.join('\r\n'));
+    switch (color){
+        case "red":
+            console.log(colors.red(logData.join('\r\n')));
+            return;
+        case "blue":
+            console.log(colors.blue(logData.join('\r\n')));
+            return;
+        default:
+            console.log(colors.green(logData.join('\r\n')));
+    }
+
+
 
     //log to text file
     fs.appendFileSync("log.txt", logData.join('\r\n'));
