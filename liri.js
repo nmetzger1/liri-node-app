@@ -156,6 +156,9 @@ function doWhat() {
 }
 
 function addToLog(logData, color){
+    //log to text file
+    fs.appendFileSync("log.txt", logData.join('\r\n'));
+    fs.appendFileSync("log.txt", '\r\n***************************************************\r\n');
 
     //display in console
     switch (color){
@@ -168,10 +171,4 @@ function addToLog(logData, color){
         default:
             console.log(colors.green(logData.join('\r\n')));
     }
-
-
-
-    //log to text file
-    fs.appendFileSync("log.txt", logData.join('\r\n'));
-    fs.appendFileSync("log.txt", '\r\n***************************************************\r\n');
 }
